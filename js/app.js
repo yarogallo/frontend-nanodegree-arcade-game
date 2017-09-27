@@ -1,26 +1,27 @@
 const ENEMY_ROW = [60, 143, 226];
 const allEnemies = [];
+let resetEnemies = null;
 
+const GameCharacter = {
+    initCharacter: function(x, y, imageSrc) {
+        this.x = x;
+        this.y = y;
+        this.sprite = imageSrc;
+    },
+    render: function() {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+};
 
-const GameCharacter = function(x, y, imageSrc) {
-    this.x = x;
-    this.y = y;
-    this.sprite = imageSrc;
-}
+const Enemy = Object.create(GameCharacter);
+console.log(Enemy.__proto__);
 
-GameCharacter.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
-
-const Enemy = function(x, y, speed) {
-    GameCharacter.call(this, x, y, 'images/enemy-bug.png');
+Enemy.initEnemy = function(x, y, imageSrc, speed) {
+    this.initCharacter(x, y, imageSrc);
     this.speed = speed;
 };
 
-Enemy.prototype = Object.create(GameCharacter.prototype);
-
-Enemy.prototype.update = function(dt) {
-
+Enemy.update = function(dt) {
     if (isCollision(player, this)) {
         player.reset();
     }
@@ -31,26 +32,35 @@ Enemy.prototype.update = function(dt) {
     } else {
         this.x += (dt * this.speed);
     }
-
 };
 
-const Player = function(x, y) {
-    GameCharacter.call(this, x, y, 'images/char-pink-girl.png')
+const Player = Object.create(GameCharacter);
+
+Player.initPlayer = function(x, y, imageSrc) {
+    this.initCharacter(x, y, imageSrc);
+    this.level = 1;
 };
 
-Player.prototype = Object.create(GameCharacter.prototype);
-Player.prototype.reset = function() {
+Player.renderLevel = function() {
+    let level = `Level: ${this.level}`;
+    ctx.font = "bold 35px arial";
+    ctx.fillText(level, 5, 95);
+};
+
+Player.reset = function() {
     this.x = 202;
     this.y = 405;
 }
 
-Player.prototype.update = function() {
+Player.update = function() {
     if (this.y < 0) {
+        this.level === 4 ? this.level = 1 : this.level++;
+        generateLevel(this.level);
         this.reset();
     }
 };
 
-Player.prototype.handleInput = function(keyCode) {
+Player.handleInput = function(keyCode) {
     switch (keyCode) {
         case "left":
             if (this.x > 0) {
@@ -82,33 +92,56 @@ Player.prototype.handleInput = function(keyCode) {
 
 }
 
+const Gemstone = Object.create(GameCharacter);
+
+Gemstone.initGemstone = function(x, y, imageSrc, color) {
+    this.initCharacter(x, y, imageSrc);
+    this.color = color;
+}
+
 function isCollision(gameCharacter_1, gameCharacter_2) {
 
-    return Math.abs(gameCharacter_1.x - gameCharacter_2.x) < 20 && Math.abs(gameCharacter_1.y - gameCharacter_2.y) < 15 ? true : false;
+    return Math.abs(gameCharacter_1.x - gameCharacter_2.x) < 25 && Math.abs(gameCharacter_1.y - gameCharacter_2.y) < 15 ? true : false;
 
 }
 
 function generateEnemies(speed, time) {
+
     const getRow = () => Math.floor(Math.floor(Math.random() * 3));
 
-    allEnemies.push(new Enemy(0, ENEMY_ROW[getRow()], speed));
+    const getEnemy = () => {
+        let enemy = Object.create(Enemy);
+        enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', speed);
+        return enemy;
+    };
 
-    let reset = setInterval(() => {
-        allEnemies.push(new Enemy(-101, ENEMY_ROW[getRow()], speed))
+    allEnemies.push(getEnemy());
+
+    resetEnemies = setInterval(() => {
+        allEnemies.push(getEnemy());
     }, time);
 
-    return reset;
 }
 
+function generateLevel(levelValue) {
+    let speed = 100 + (levelValue * 50);
+    let time = 1225 - (levelValue * 225);
 
-var player = new Player(202, 405);
+    clearInterval(resetEnemies);
+    generateEnemies(speed, time);
+}
+
+const player = Object.create(Player);
+player.initPlayer(202, 405, 'images/char-pink-girl.png');
 
 
 Resources.onReady(function() {
 
     // This listens for key presses and sends the keys to your
     // Player.handleInput() method. You don't need to modify this.\
-    let resetInterval = generateEnemies(250, 1000);
+    //resetInterval = generateEnemies(250, 1000);
+    generateLevel(player.level);
+
     // var allEnemies = [new Enemy(10, 20), new Enemy(5, 6)];
 
     player.render();
