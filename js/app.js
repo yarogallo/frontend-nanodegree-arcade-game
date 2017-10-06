@@ -1,10 +1,13 @@
 const ENEMY_ROW = [60, 143, 226];
+const ENEMY_SPEED = [200, 250, 300];
 const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
 const GEMS_ROW = [83, 166, 249];
+
 
 const allEnemies = [];
 const allGems = [];
 let resetEnemies = null;
+let playerSource = null;
 
 const GameCharacter = {
     initCharacter: function(x, y, imageSrc) {
@@ -28,33 +31,32 @@ Enemy.initEnemy = function(x, y, imageSrc, speed) {
 Enemy.update = function(dt) {
 
     if (isCollision(player, this)) {
-        player.score -= 10;
+        player.score -= 100;
         player.move(202, 390);
     }
 
-    if (this.x > 550) {
-        removeCharacter(allEnemies, this);
-    } else {
-        this.x += (dt * this.speed);
-    }
+    this.x > 550 ? removeCharacter(allEnemies, this) : this.x += (dt * this.speed);
+
 };
 
 const Player = Object.create(GameCharacter);
 
 Player.initPlayer = function(x, y, imageSrc) {
     this.initCharacter(x, y, imageSrc);
-    this.level = 1;
-    this.score = 0;
 };
 
 Player.render = function() {
     GameCharacter.render.call(this);
-    this.renderLevelScore();
+    this.renderRounds(20, 575);
+    this.renderScore(350, 575);
 };
 
-Player.renderLevelScore = function() {
-    renderText(`Level: ${this.level}`, 20, 575);
-    renderText(`Score: ${this.score}`, 360, 575);
+Player.renderRounds = function(x, y) {
+    renderText(`Rounds: ${this.rounds}`, x, y);
+};
+
+Player.renderScore = function(x, y) {
+    renderText(`Score: ${this.score}`, x, y);
 };
 
 Player.move = function(x, y) {
@@ -62,24 +64,32 @@ Player.move = function(x, y) {
     this.y = y;
 }
 
+Player.setRounds = function(value) {
+    this.rounds = value;
+};
+
+Player.setScore = function(value) {
+    this.score = value;
+};
+
 // check if the player is in the sea
 Player.update = function() {
 
     if (this.y < 0) {
 
-        if (this.level === 4) {
-            this.level = 1;
-            this.score = 0;
-            generateLevel(this.level);
-
+        if (this.rounds === 4) {
+            this.score >= 1000 ? startOver("You won. Congratulations!!") : startOver("Sorry, you lose!!");
         } else {
-            this.level++;
+            this.rounds++;
+            generateGems(player.rounds);
+            this.score += 100;
         }
 
-        generateLevel(this.level);
         this.move(202, 390);
     }
 };
+
+
 
 Player.handleInput = function(keyCode) {
     switch (keyCode) {
@@ -131,6 +141,7 @@ Gem.renderValue = function() {
 
 Gem.update = function() {
     if (isCollision(player, this)) {
+
         player.score += this.value;
         removeCharacter(allGems, this);
     }
@@ -155,13 +166,13 @@ function isCollision(gameCharacter_1, gameCharacter_2) {
 
 }
 
-function generateEnemies(speed, time) {
+function generateEnemies() {
 
     const getRow = () => Math.floor(Math.floor(Math.random() * 3));
 
     const getEnemy = () => {
         let enemy = Object.create(Enemy);
-        enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', speed);
+        enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', ENEMY_SPEED[getRow()]);
 
         return enemy;
     };
@@ -170,48 +181,80 @@ function generateEnemies(speed, time) {
 
     resetEnemies = setInterval(() => {
         allEnemies.push(getEnemy());
-    }, time);
+    }, 700);
 
 }
 
-function generateGems(level) {
+function generateGems(amount) {
     allGems.splice(0, allGems.length);
     const getRow = () => Math.floor(Math.floor(Math.random() * 3));
 
-    for (let index = 0; index < level; index++) {
+    for (let index = 0; index < amount; index++) {
 
         let gem = Object.create(Gem)
         gem.initGem(10 + index * 101, GEMS_ROW[getRow()], `images/Gem-${GEMS_COLOR[getRow()]}.png`, 100);
-        //gem.initGem(110, 249, `images/Gem-${GEMS_COLOR[getRow()]}.png`, 100)
         allGems.push(gem);
     }
 
+}
+
+function toggleClass(screen) {
+    if (screen.classList.contains("open")) {
+        screen.classList.remove("open");
+        screen.classList.add("close");
+    } else {
+        screen.classList.remove("close");
+        screen.classList.add("open");
+    }
 
 }
 
-function generateLevel(level) {
-    let speed = 100 + (level * 50);
-    let time = 1225 - (level * 225);
+function startOver(smg) {
+    toggleClass(document.querySelector('#restart-game-container'));
+
+    document.getElementById('gameResult').innerText = smg;
+    document.getElementById('score').innerText = player.score;
+    document.getElementById('rounds').innerText = player.rounds;
+}
+
+function initGame() {
+    player.setRounds(0);
+    player.setScore(0);
 
     clearInterval(resetEnemies);
-    generateGems(level);
-    generateEnemies(speed, time);
+    generateGems(player.rounds);
+    generateEnemies();
 }
 
 const player = Object.create(Player);
-player.initPlayer(202, 390, 'images/char-pink-girl.png');
-
+player.initPlayer(202, 390, 'images/char-cat-girl.png');
 
 Resources.onReady(function() {
+    const buttons = document.querySelectorAll('button');
+    const myPlayers = document.querySelectorAll('.player');
 
-    // This listens for key presses and sends the keys to your
-    // Player.handleInput() method. You don't need to modify this.\
-    //resetInterval = generateEnemies(250, 1000);
-    generateLevel(player.level);
+    myPlayers.forEach((myPlayer) => {
+        myPlayer.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            let anotherSelectedPlayer = document.getElementsByClassName('bouncing')[0];
+            if (anotherSelectedPlayer) {
+                anotherSelectedPlayer.classList.remove('bouncing');
+            }
+            evt.target.classList.add("bouncing");
+            player.sprite = evt.target.value;
+        })
+    });
 
+    buttons.forEach((button) => {
+        button.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            toggleClass(evt.path[3]);
+            initGame();
+        });
+    });
 
-
-    document.addEventListener('keyup', function(e) {
+    document.addEventListener('keyup', (evt) => {
         var allowedKeys = {
             37: 'left',
             38: 'up',
@@ -219,8 +262,8 @@ Resources.onReady(function() {
             40: 'down'
         };
 
-        e.preventDefault();
-        e.stopPropagation();
-        player.handleInput(allowedKeys[e.keyCode]);
+        evt.preventDefault();
+        evt.stopPropagation();
+        player.handleInput(allowedKeys[evt.keyCode]);
     });
 });

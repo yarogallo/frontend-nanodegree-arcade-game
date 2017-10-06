@@ -4,12 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Effective JavaScript: Frogger</title>
-    <link href="https://fonts.googleapis.com/css?family=Slabo+27px" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pangolin" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/resources.js"></script>
 </head>
 
 <body>
-    <script src="js/resources.js"></script>
+    <section id="start-game-container" class="row open">
+        <div class="col dark-green space-around round-corners">
+            <h1>Welcome to Arcade Game</h1>
+            <article>
+                <h3 class="underline white-text">About the Game</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed
+                    augue semper porta.</p>
+                <h3 class="underline white-text">Rules for win:</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed
+                    augue semper porta. Mauris massa.</p>
+                <h3 class="underline white-text">Some tips:</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed
+                    augue semper porta. Mauris massa.</p>
+            </article>
+            <form>
+                <h3 class="underline white-text">Choose your Player:</h3>
+                <div>
+                    <input class="player" type="image" name="game-player" value="images/char-pink-girl.png" src="images/char-pink-girl.png">
+                    <input class="player" type="image" name="game-playe" value="images/char-boy.png" src="images/char-boy.png">
+                    <input class="player" type="image" name="game-playe" value="images/char-horn-girl.png" src="images/char-horn-girl.png">
+                    <input class="player" type="image" name="game-playe" value="images/char-cat-girl.png" src="images/char-cat-girl.png">
+                </div>
+
+
+                <button id="start-game-button" class="round-corners white-text" type="buttom">Start Game</button>
+            </form>
+        </div>
+    </section>
+    <section id="restart-game-container" class="row close">
+        <div class="col dark-green space-around round-corners displayNone">
+            <h1 id="gameResult"></h1>
+            <h3>Your Score was <span id="score" class="red-text"></span> in <span id="rounds" class="red-text"></span> rounds</h3>
+            <p>Do you want try again??</p>
+            <form>
+                <button id="restart-game-button" class="round-corners white-text" type="buttom">Start Over</button>
+            </form>
+        </div>
+    </section>
+
+
+
+
     <script src="js/engine.js"></script>
     <script src="js/app.js"></script>
 

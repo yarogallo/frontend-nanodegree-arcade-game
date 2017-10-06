@@ -1,4 +1,81 @@
 body {
+    margin: 0;
+    padding: 0;
     text-align: center;
-    font-family: 'Slabo 27px', serif;
+    font-family: 'Pangolin', cursive;
+    position: relative;
+}
+
+.player {
+    transition: transform 0.5s ease-in-out;
+    border-color: none;
+}
+
+.player:focus {
+    outline: none;
+}
+
+.row {
+    position: absolute;
+    width: 100%;
+    transition: transform 1s ease;
+}
+
+.col {
+    width: 70%;
+    margin: 2% auto;
+}
+
+p {
+    padding: 0 50px;
+}
+
+.space-around {
+    padding: 10px;
+}
+
+.dark-green {
+    background-color: rgb(65, 244, 139);
+}
+
+.round-corners {
+    border-radius: 5px;
+}
+
+.white-text {
+    color: white;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.red-text {
+    color: red;
+}
+
+.row.close {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, -100%, 0);
+}
+
+.row.open {
+    -webkit-transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.bouncing {
+    -webkit-transform: scale(1.2) translateY(-50px);
+    transform: scale(1.2) translateY(-50px);
+}
+
+button {
+    background-color: black;
+    font-family: 'Pangolin', cursive;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 10px 15px;
+    box-shadow: 2px 2px 2px 2px black, 3px 3px 2px 2px black;
+    border: none;
+    margin-bottom: 20px;
 }
