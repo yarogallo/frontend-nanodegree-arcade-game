@@ -1,13 +1,11 @@
 const ENEMY_ROW = [60, 143, 226];
 const ENEMY_SPEED = [200, 250, 300];
-const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
 const GEMS_ROW = [83, 166, 249];
-
+const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
 
 const allEnemies = [];
 const allGems = [];
 let resetEnemies = null;
-let playerSource = null;
 
 const GameCharacter = {
     initCharacter: function(x, y, imageSrc) {
@@ -48,15 +46,15 @@ Player.initPlayer = function(x, y, imageSrc) {
 Player.render = function() {
     GameCharacter.render.call(this);
     this.renderRounds(20, 575);
-    this.renderScore(350, 575);
+    this.renderScore(320, 575);
 };
 
 Player.renderRounds = function(x, y) {
-    renderText(`Rounds: ${this.rounds}`, x, y);
+    renderText(`Rounds: ${this.rounds}`, x, y, "#4f0404");
 };
 
 Player.renderScore = function(x, y) {
-    renderText(`Score: ${this.score}`, x, y);
+    renderText(`Score: ${this.score}`, x, y, "#4f0404");
 };
 
 Player.move = function(x, y) {
@@ -74,17 +72,17 @@ Player.setScore = function(value) {
 
 // check if the player is in the sea
 Player.update = function() {
+    if (this.score < 0) {
+        startOver("Sorry, you can't have negative score");
 
-    if (this.y < 0) {
-
+    } else if (this.y < 0) {
         if (this.rounds === 4) {
             this.score >= 1000 ? startOver("You won. Congratulations!!") : startOver("Sorry, you lose!!");
         } else {
             this.rounds++;
-            generateGems(player.rounds);
             this.score += 100;
+            generateGems(player.rounds);
         }
-
         this.move(202, 390);
     }
 };
@@ -125,10 +123,14 @@ Player.handleInput = function(keyCode) {
 
 const Gem = Object.create(GameCharacter);
 
-Gem.initGem = function(x, y, imageSrc, value) {
+Gem.initGem = function(x, y, imageSrc, color) {
     this.initCharacter(x, y, imageSrc);
-    this.value = value;
+    this.color = color;
 };
+
+Gem.setValue = function() {
+    this.value = this.color === "Orange" ? 100 : this.color === "Blue" ? 150 : 120;
+}
 
 Gem.render = function() {
     GameCharacter.render.call(this);
@@ -136,7 +138,7 @@ Gem.render = function() {
 };
 
 Gem.renderValue = function() {
-    renderText(`${this.value}`, this.x + 10, this.y + 101);
+    renderText(`${this.value}`, this.x + 10, this.y + 101, "#b20a0a");
 };
 
 Gem.update = function() {
@@ -147,9 +149,9 @@ Gem.update = function() {
     }
 };
 
-function renderText(text, x, y) {
+function renderText(text, x, y, color) {
     ctx.font = "bold 30px arial";
-    ctx.fillStyle = "#ff3399";
+    ctx.fillStyle = color;
 
     ctx.fillText(text, x, y);
 }
@@ -191,30 +193,13 @@ function generateGems(amount) {
 
     for (let index = 0; index < amount; index++) {
 
-        let gem = Object.create(Gem)
-        gem.initGem(10 + index * 101, GEMS_ROW[getRow()], `images/Gem-${GEMS_COLOR[getRow()]}.png`, 100);
+        let gem = Object.create(Gem);
+        let color = GEMS_COLOR[getRow()];
+        gem.initGem(10 + index * 101, GEMS_ROW[getRow()], `images/Gem-${color}.png`, color);
+        gem.setValue();
         allGems.push(gem);
     }
 
-}
-
-function toggleClass(screen) {
-    if (screen.classList.contains("open")) {
-        screen.classList.remove("open");
-        screen.classList.add("close");
-    } else {
-        screen.classList.remove("close");
-        screen.classList.add("open");
-    }
-
-}
-
-function startOver(smg) {
-    toggleClass(document.querySelector('#restart-game-container'));
-
-    document.getElementById('gameResult').innerText = smg;
-    document.getElementById('score').innerText = player.score;
-    document.getElementById('rounds').innerText = player.rounds;
 }
 
 function initGame() {
@@ -226,11 +211,35 @@ function initGame() {
     generateEnemies();
 }
 
+function startOver(smg) {
+    const restartScreen = document.getElementById('restart-game-container');
+    const gameResult = document.getElementById('gameResult');
+    const finalScore = document.getElementById('score');
+    const finalRounds = document.getElementById('rounds');
+
+    gameResult.innerText = smg;
+    finalScore.innerText = player.score;
+    finalRounds.innerText = player.rounds;
+    restartScreen.classList.remove("close");
+    initGame();
+}
+
+function initGameHandler(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    let screen = evt.target.id === 'start-game-button' ? document.getElementById('start-game-container') :
+        document.getElementById('restart-game-container');
+
+    initGame();
+    screen.classList.add('close');
+}
+
 const player = Object.create(Player);
 player.initPlayer(202, 390, 'images/char-cat-girl.png');
 
 Resources.onReady(function() {
-    const buttons = document.querySelectorAll('button');
+    const gameButtons = document.querySelectorAll('.gameButton');
     const myPlayers = document.querySelectorAll('.player');
 
     myPlayers.forEach((myPlayer) => {
@@ -246,12 +255,9 @@ Resources.onReady(function() {
         })
     });
 
-    buttons.forEach((button) => {
-        button.addEventListener('click', (evt) => {
-            evt.preventDefault();
-            toggleClass(evt.path[3]);
-            initGame();
-        });
+
+    gameButtons.forEach((button) => {
+        button.addEventListener('click', initGameHandler);
     });
 
     document.addEventListener('keyup', (evt) => {
