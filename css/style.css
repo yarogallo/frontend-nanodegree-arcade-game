@@ -6,24 +6,29 @@ body {
     position: relative;
 }
 
-.player {
-    transition: transform 0.5s ease-in-out;
+.player-input {
+    transition: transform 0.5s ease;
     border-color: none;
 }
 
-.player:focus {
+.player-input:focus {
     outline: none;
+}
+
+.container {
+    position: relative;
+    width: 100%;
 }
 
 .row {
     position: absolute;
-    width: 100%;
-    transition: transform 1s ease;
-}
-
-.col {
+    top: 10px;
     width: 70%;
-    margin: 2% auto;
+    max-width: 950px;
+    margin: 1% 15%;
+    will-change: transform;
+    transform: translateZ(0);
+    transition: transform 1.5s ease;
 }
 
 p {
@@ -55,8 +60,8 @@ p {
 }
 
 .row.close {
-    -webkit-transform: translate3d(0, -100%, 0);
-    transform: translate3d(0, -100%, 0);
+    -webkit-transform: translate3d(0, -150%, 0);
+    transform: translate3d(0, -150%, 0);
 }
 
 .row.open {

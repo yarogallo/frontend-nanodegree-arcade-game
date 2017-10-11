@@ -27,14 +27,12 @@ Enemy.initEnemy = function(x, y, imageSrc, speed) {
 };
 
 Enemy.update = function(dt) {
-
     if (isCollision(player, this)) {
         player.score -= 100;
         player.move(202, 390);
     }
 
     this.x > 550 ? removeCharacter(allEnemies, this) : this.x += (dt * this.speed);
-
 };
 
 const Player = Object.create(GameCharacter);
@@ -74,10 +72,14 @@ Player.setScore = function(value) {
 Player.update = function() {
     if (this.score < 0) {
         startOver("Sorry, you can't have negative score");
-
-    } else if (this.y < 0) {
+    }
+    if (this.y < 0) { // its on the sea
         if (this.rounds === 4) {
-            this.score >= 1000 ? startOver("You won. Congratulations!!") : startOver("Sorry, you lose!!");
+            if (this.score >= 1000) {
+                startOver("You won. Congratulations!!")
+            } else {
+                startOver("Sorry, you lose!!");
+            }
         } else {
             this.rounds++;
             this.score += 100;
