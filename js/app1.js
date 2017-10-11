@@ -8,14 +8,15 @@ const Game = (function() {
     const player = Object.create(Player);
     const allEnemies = [];
     const allGems = [];
-    let score = 0
+    let score = 0;
     let rounds = 0;
 
+    //init player with a default image
     player.initPlayer(202, 390, 'images/char-cat-girl.png');
 
     const getRow = () => Math.floor(Math.floor(Math.random() * 3));
 
-    const generateEnemies = () => {
+    const generateEnemies = () => { //fill the allEnemies array with enemies
         const createEnemy = () => {
             let enemy = Object.create(Enemy);
             enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', "enemy", ENEMY_SPEED[getRow()]);
@@ -29,7 +30,7 @@ const Game = (function() {
     }
 
     const generateGems = () => {
-        allGems.splice(0, allGems.length);
+        allGems.splice(0, allGems.length); //fill allGems array with gems taking into account the game rounds 
 
         for (let index = 0; index < rounds; index++) {
             let color = GEMS_COLOR[getRow()];
@@ -42,41 +43,44 @@ const Game = (function() {
 
     const collitionWithPlayerHandler = (character) => {
         if (Math.abs(player.x - character.x) <= 30 && Math.abs(player.y - character.y) <= 30) {
-            if (character.type === "enemy") {
+            if (character.type === "enemy") { // if there is a collition with an enemy and game score negative, the game is over (player loose)
                 if ((score -= 100) < 0) {
                     endGame("You can't have a negative score", score, rounds);
                 }
                 player.initialPosition();
             }
-            if (character.type === "gem") {
+            if (character.type === "gem") { // if threre is a collition with a gem, score is aumented with the gem value 
                 score += character.value;
                 removeCharacter(character, allGems);
             }
         }
     }
 
-    const roundCompletedHandler = () => {
-        if (rounds === 4) {
-            if (score <= 1000) {
-                endGame("Im Sorry!! You Loose!!", score, rounds);
+    const roundCompletedHandler = (player) => { // check if the Player finish a round check
+        if (player.y < 0) {
+            if (rounds === 4) { // if the round is number 4 and the score is more than or equal 1000 (player win)
+                if (score <= 1000) {
+                    endGame("Im Sorry!! You Loose!!", score, rounds);
+                } else { // the round is 4 but the score is less than 1000 (player loose)
+                    endGame("Congratulations!! You are a winner!!", score, rounds)
+                }
             } else {
-                endGame("Congratulations!! You are a winner!!", score, rounds)
+                rounds++; //if the round is less than 4 increment score, generate gems depending of the rounds number, move player initial position
+                score += 100;
+                player.initialPosition();
+                generateGems(rounds);
             }
-        } else {
-            rounds++;
-            score += 100;
-            player.initialPosition();
-            generateGems(rounds);
         }
+
     };
 
-    const enemyOutOfCanvasHandler = (enemy) => {
+    const enemyOutOfCanvasHandler = (enemy) => { // if there is an enemy out of canvas, remove it from allEnemies array
         if (enemy.x > 550) {
             removeCharacter(enemy, allEnemies);
         }
     };
 
-    const handleInput = (keyCode) => {
+    const handleInput = (keyCode) => { // move player lefet, right, up, down, depending on keyCode value
         switch (keyCode) {
             case "left":
                 player.moveLeft();
@@ -99,7 +103,7 @@ const Game = (function() {
         }
     }
 
-    const renderGameProgress = () => {
+    const renderGameProgress = () => { // render score and rounds for the user keep track on his progress in the game
         ctx.fillText(`Score: ${score}`, 30, 100);
         ctx.fillText(`Rounds: ${rounds}`, 330, 100);
     };
@@ -118,7 +122,7 @@ const Game = (function() {
         generateGems();
     }
 
-    return {
+    return { //all game public properties and methos
         allEnemies: allEnemies,
         allGems: allGems,
         player: player,
@@ -133,7 +137,7 @@ const Game = (function() {
     };
 })();
 
-function endGame(smg, score, rounds) {
+function endGame(smg, score, rounds) { //show screen corresponding to the end game
     const finalScreen = document.getElementById('final-screen');
     document.getElementById('gameResult').innerText = smg;
     document.getElementById('score').innerText = score;
