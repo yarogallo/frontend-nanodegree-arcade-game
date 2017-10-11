@@ -50,10 +50,6 @@ Player.moveUp = function() {
     if (this.y > -10) this.y -= 83;
 };
 
-Player.isOnTheSea = function() {
-    return this.y < 0;
-};
-
 Player.update = function() {
     Game.roundCompletedHandler(this);
 };
@@ -74,3 +70,9 @@ Gem.render = function() {
 Gem.update = function() {
     Game.collitionWithPlayerHandler(this); //check collitions between player and tbhis gem
 };
+
+const Rock = Object.create(GameCharacter);
+
+Rock.initRock = function(x, y, sprite, type) {
+    this.initCharacter(x, y, sprite, type);
+}

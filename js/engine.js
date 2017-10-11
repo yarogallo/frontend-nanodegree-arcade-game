@@ -157,11 +157,17 @@ var Engine = (function(global) {
             gem.render();
         });
 
+        Game.allRocks.forEach(function(rock) {
+            rock.render();
+        });
+
         Game.allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         Game.player.render();
+
+
 
         Game.renderGameProgress();
 
@@ -191,6 +197,7 @@ var Engine = (function(global) {
         'images/Gem-Green.png',
         'images/Gem-Blue.png',
         'images/Gem-Orange.png',
+        'images/Rock.png',
     ]);
     Resources.onReady(init);
 

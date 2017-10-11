@@ -1,20 +1,45 @@
 const Game = (function() {
     const ENEMY_ROW = [60, 143, 226];
     const ENEMY_SPEED = [200, 250, 300];
-    const GEMS_ROW = [83, 166, 249];
+    const ROCK_POS = [
+        [111, 83],
+        [414, 83],
+        [313, 249],
+        [10, 166]
+    ];
+    const GEMS_POS = [
+        [
+            [10, 83],
+            [212, 83],
+            [212, 166]
+        ],
+        [
+            [111, 166],
+            [313, 166],
+            [414, 166]
+        ],
+        [
+            [10, 249],
+            [212, 249],
+            [313, 83]
+        ]
+    ];
     const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
     let resetEnemies = null;
 
     const player = Object.create(Player);
+    const rock = Object.create(Rock);
     const allEnemies = [];
     const allGems = [];
+    const allRocks = [];
     let score = 0;
     let rounds = 0;
 
     //init player with a default image
     player.initPlayer(202, 390, 'images/char-cat-girl.png');
+    rock.initRock(313, 166, 'images/Rock.png', 'rock');
 
-    const getRow = () => Math.floor(Math.floor(Math.random() * 3));
+    const getRow = () => Math.floor(Math.floor(Math.random() * 3)); // random number between 0 and 2
 
     const generateEnemies = () => { //fill the allEnemies array with enemies
         const createEnemy = () => {
@@ -27,19 +52,31 @@ const Game = (function() {
         resetEnemies = setInterval(() => {
             allEnemies.push(createEnemy());
         }, 700);
-    }
+    };
 
-    const generateGems = () => {
-        allGems.splice(0, allGems.length); //fill allGems array with gems taking into account the game rounds 
+    const generateRocks = () => { //fill the allRocks array depending on rounds
+        if (rounds > 0) {
+            let rock = Object.create(Rock);
+            let position = ROCK_POS[rounds - 1];
+            rock.initRock(position[0], position[1], 'images/Rock.png', 'rock');
+            allRocks.push(rock);
+        } else {
+            allRocks.splice(0, 4);
+        }
+    };
+
+    const generateGems = () => { //fill allGems array with gems taking into account the game rounds 
+        allGems.splice(0, allGems.length);
 
         for (let index = 0; index < rounds; index++) {
             let color = GEMS_COLOR[getRow()];
             let gem = Object.create(Gem);
-            gem.initGem(10 + index * 101, GEMS_ROW[getRow()], `images/Gem-${color}.png`, "gem", color);
+            let location = GEMS_POS[getRow()][getRow()];
+            gem.initGem(location[0], location[1], `images/Gem-${color}.png`, "gem", color);
             allGems.push(gem);
         }
 
-    }
+    };
 
     const collitionWithPlayerHandler = (character) => {
         if (Math.abs(player.x - character.x) <= 30 && Math.abs(player.y - character.y) <= 30) {
@@ -53,22 +90,25 @@ const Game = (function() {
                 score += character.value;
                 removeCharacter(character, allGems);
             }
+            return true;
         }
-    }
+        return false;
+    };
 
     const roundCompletedHandler = (player) => { // check if the Player finish a round check
         if (player.y < 0) {
-            if (rounds === 4) { // if the round is number 4 and the score is more than or equal 1000 (player win)
+            rounds++;
+            score += 50;
+            if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
                 if (score <= 1000) {
                     endGame("Im Sorry!! You Loose!!", score, rounds);
                 } else { // the round is 4 but the score is less than 1000 (player loose)
                     endGame("Congratulations!! You are a winner!!", score, rounds)
                 }
             } else {
-                rounds++; //if the round is less than 4 increment score, generate gems depending of the rounds number, move player initial position
-                score += 100;
                 player.initialPosition();
-                generateGems(rounds);
+                generateGems();
+                generateRocks();
             }
         }
 
@@ -84,18 +124,22 @@ const Game = (function() {
         switch (keyCode) {
             case "left":
                 player.moveLeft();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveRight();
                 break;
 
             case "right":
                 player.moveRight();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveLeft();
                 break;
 
             case "up":
                 player.moveUp();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveDown();
                 break;
 
             case "down":
                 player.moveDown();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveUp();
                 break;
 
             default:
@@ -120,11 +164,13 @@ const Game = (function() {
         clearInterval(resetEnemies);
         generateEnemies();
         generateGems();
-    }
+        generateRocks();
+    };
 
     return { //all game public properties and methos
         allEnemies: allEnemies,
         allGems: allGems,
+        allRocks: allRocks,
         player: player,
         score: score,
         rounds: rounds,
