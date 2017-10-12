@@ -1,78 +1,76 @@
-const GameCharacter = {
-    initCharacter(x, y, sprite, type) {
-        this.x = x;
-        this.y = y;
-        this.sprite = sprite;
-        this.type = type
-    },
-    render() {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-};
+const GameCharacter = function(x, y, sprite, type) {
+    this.x = x;
+    this.y = y;
+    this.sprite = sprite;
+    this.type = type;
+}
 
-const Enemy = Object.create(GameCharacter);
+GameCharacter.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+}
 
-Enemy.initEnemy = function(x, y, sprite, type, speed) {
-    this.initCharacter(x, y, sprite, type);
+const Enemy = function(x, y, sprite, type, speed) {
+    GameCharacter.call(this, x, y, sprite, type);
     this.speed = speed;
-};
+}
 
-Enemy.update = function(dt) {
+Enemy.prototype = Object.create(GameCharacter.prototype);
+
+
+Enemy.prototype.update = function(dt) {
     Game.collitionWithPlayerHandler(this); // check if there is a collition between this enemy and the player
     Game.enemyOutOfCanvasHandler(this); // check if the enemy is out of canvas
     this.x += (dt * this.speed); // keep moving
 };
 
-const Player = Object.create(GameCharacter);
+const Player = function(x, y, sprite, type) {
+    GameCharacter.call(this, x, y, sprite, type);
+}
 
-Player.initPlayer = function(x, y, sprite, type) {
-    this.initCharacter(x, y, sprite, type);
-};
+Player.prototype = Object.create(GameCharacter.prototype);
 
-Player.initialPosition = function() {
+Player.prototype.initialPosition = function() {
     this.x = 202;
     this.y = 390;
 };
 
-Player.moveLeft = function() {
+Player.prototype.moveLeft = function() {
     if (this.x > 0) this.x -= 101;
 };
 
-Player.moveRight = function() {
+Player.prototype.moveRight = function() {
     if (this.x < 404) this.x += 101;
 };
 
-Player.moveDown = function() {
+Player.prototype.moveDown = function() {
     if (this.y < 390) this.y += 83;
 };
 
-Player.moveUp = function() {
+Player.prototype.moveUp = function() {
     if (this.y > -10) this.y -= 83;
 };
 
-Player.update = function() {
+Player.prototype.update = function() {
     Game.roundCompletedHandler(this);
 };
 
-const Gem = Object.create(GameCharacter);
-
-Gem.initGem = function(x, y, sprite, type, color) {
-    this.initCharacter(x, y, sprite, type);
+const Gem = function(x, y, sprite, type, color) {
+    GameCharacter.call(this, x, y, sprite, type);
     this.color = color;
     this.value = this.color === "Orange" ? 100 : this.color === "Blue" ? 150 : 120;
-}
+};
 
-Gem.render = function() {
-    GameCharacter.render.call(this);
+Gem.prototype.render = function() {
+    GameCharacter.prototype.render.call(this);
     ctx.fillText(`${this.value}`, this.x + 10, this.y + 101);
 };
 
-Gem.update = function() {
+Gem.prototype.update = function() {
     Game.collitionWithPlayerHandler(this); //check collitions between player and tbhis gem
 };
 
-const Rock = Object.create(GameCharacter);
-
-Rock.initRock = function(x, y, sprite, type) {
-    this.initCharacter(x, y, sprite, type);
+const Rock = function(x, y, sprite, type) {
+    GameCharacter.call(this, x, y, sprite, type);
 }
+
+Rock.prototype = Object.create(GameCharacter.prototype);

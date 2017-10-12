@@ -27,24 +27,18 @@ const Game = (function() {
     const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
     let resetEnemies = null;
 
-    const player = Object.create(Player);
-    const rock = Object.create(Rock);
+    const player = new Player(202, 390, 'images/char-cat-girl.png'); //init player with a default image
     const allEnemies = [];
     const allGems = [];
     const allRocks = [];
     let score = 0;
     let rounds = 0;
 
-    //init player with a default image
-    player.initPlayer(202, 390, 'images/char-cat-girl.png');
-    rock.initRock(313, 166, 'images/Rock.png', 'rock');
-
     const getRow = () => Math.floor(Math.floor(Math.random() * 3)); // random number between 0 and 2
 
     const generateEnemies = () => { //fill the allEnemies array with enemies
         const createEnemy = () => {
-            let enemy = Object.create(Enemy);
-            enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', "enemy", ENEMY_SPEED[getRow()]);
+            let enemy = new Enemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', "enemy", ENEMY_SPEED[getRow()]);
 
             return enemy;
         };
@@ -56,9 +50,8 @@ const Game = (function() {
 
     const generateRocks = () => { //fill the allRocks array depending on rounds
         if (rounds > 0) {
-            let rock = Object.create(Rock);
             let position = ROCK_POS[rounds - 1];
-            rock.initRock(position[0], position[1], 'images/Rock.png', 'rock');
+            let rock = new Rock(position[0], position[1], 'images/Rock.png', 'rock');
             allRocks.push(rock);
         } else {
             allRocks.splice(0, 4);
@@ -70,9 +63,8 @@ const Game = (function() {
 
         for (let index = 0; index < rounds; index++) {
             let color = GEMS_COLOR[getRow()];
-            let gem = Object.create(Gem);
             let location = GEMS_POS[getRow()][getRow()];
-            gem.initGem(location[0], location[1], `images/Gem-${color}.png`, "gem", color);
+            let gem = new Gem(location[0], location[1], `images/Gem-${color}.png`, "gem", color);
             allGems.push(gem);
         }
 
