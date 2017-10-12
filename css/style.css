@@ -6,6 +6,21 @@ body {
     position: relative;
 }
 
+button {
+    background-color: black;
+    font-family: 'Pangolin', cursive;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 10px 15px;
+    box-shadow: 2px 2px 2px 2px black, 3px 3px 2px 2px black;
+    border: none;
+    margin-bottom: 20px;
+}
+
+p {
+    padding: 0 50px;
+}
+
 .player-input {
     transition: transform 0.5s ease;
     border-color: none;
@@ -22,17 +37,21 @@ body {
 
 .row {
     position: absolute;
-    top: 10px;
-    width: 70%;
-    max-width: 950px;
-    margin: 1% 15%;
+    width: 60%;
+    margin: 3% 20%;
     will-change: transform;
     transform: translateZ(0);
     transition: transform 1.5s ease;
 }
 
-p {
-    padding: 0 50px;
+.row.close {
+    -webkit-transform: translate3d(0, -150%, 0);
+    transform: translate3d(0, -150%, 0);
+}
+
+.row.open {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
 }
 
 .space-around {
@@ -59,28 +78,7 @@ p {
     color: red;
 }
 
-.row.close {
-    -webkit-transform: translate3d(0, -150%, 0);
-    transform: translate3d(0, -150%, 0);
-}
-
-.row.open {
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-}
-
 .bouncing {
     -webkit-transform: scale(1.2) translateY(-50px);
     transform: scale(1.2) translateY(-50px);
-}
-
-button {
-    background-color: black;
-    font-family: 'Pangolin', cursive;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 10px 15px;
-    box-shadow: 2px 2px 2px 2px black, 3px 3px 2px 2px black;
-    border: none;
-    margin-bottom: 20px;
 }
