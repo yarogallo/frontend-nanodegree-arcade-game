@@ -1,6 +1,6 @@
 const Game = (function() {
     const ENEMY_ROW = [60, 143, 226];
-    const ENEMY_SPEED = [200, 250, 300];
+    const ENEMY_SPEED = [230, 280, 350];
     const ROCK_POS = [
         [111, 83],
         [414, 83],
@@ -99,6 +99,7 @@ const Game = (function() {
         if (player.y < 0) {
             rounds++;
             score += 50;
+            player.initialPosition();
             if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
                 if (score <= 1000) {
                     endGame("Im Sorry!! You Loose!!", score, rounds);
@@ -106,7 +107,6 @@ const Game = (function() {
                     endGame("Congratulations!! You are a winner!!", score, rounds)
                 }
             } else {
-                player.initialPosition();
                 generateGems();
                 generateRocks();
             }
