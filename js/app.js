@@ -1,265 +1,229 @@
-const ENEMY_ROW = [60, 143, 226];
-const ENEMY_SPEED = [200, 250, 300];
-const GEMS_ROW = [83, 166, 249];
-const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
+const Game = (function() {
+    const ENEMY_ROW = [60, 143, 226];
+    const ENEMY_SPEED = [230, 280, 350];
+    const ROCK_POS = [
+        [111, 83],
+        [414, 83],
+        [313, 249],
+        [10, 166]
+    ];
+    const GEMS_POS = [
+        [
+            [10, 83],
+            [212, 83],
+            [212, 166]
+        ],
+        [
+            [111, 166],
+            [313, 166],
+            [414, 166]
+        ],
+        [
+            [10, 249],
+            [212, 249],
+            [313, 83]
+        ]
+    ];
+    const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
+    let resetEnemies = null;
 
-const allEnemies = [];
-const allGems = [];
-let resetEnemies = null;
+    const player = Object.create(Player);
+    const rock = Object.create(Rock);
+    const allEnemies = [];
+    const allGems = [];
+    const allRocks = [];
+    let score = 0;
+    let rounds = 0;
 
-const GameCharacter = {
-    initCharacter: function(x, y, imageSrc) {
-        this.x = x;
-        this.y = y;
-        this.sprite = imageSrc;
-    },
-    render: function() {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
+    //init player with a default image
+    player.initPlayer(202, 390, 'images/char-cat-girl.png');
+    rock.initRock(313, 166, 'images/Rock.png', 'rock');
 
-};
+    const getRow = () => Math.floor(Math.floor(Math.random() * 3)); // random number between 0 and 2
 
-const Enemy = Object.create(GameCharacter);
+    const generateEnemies = () => { //fill the allEnemies array with enemies
+        const createEnemy = () => {
+            let enemy = Object.create(Enemy);
+            enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', "enemy", ENEMY_SPEED[getRow()]);
 
-Enemy.initEnemy = function(x, y, imageSrc, speed) {
-    this.initCharacter(x, y, imageSrc);
-    this.speed = speed;
-};
-
-Enemy.update = function(dt) {
-    if (isCollision(player, this)) {
-        player.score -= 100;
-        player.move(202, 390);
-    }
-
-    this.x > 550 ? removeCharacter(allEnemies, this) : this.x += (dt * this.speed);
-};
-
-const Player = Object.create(GameCharacter);
-
-Player.initPlayer = function(x, y, imageSrc) {
-    this.initCharacter(x, y, imageSrc);
-};
-
-Player.render = function() {
-    GameCharacter.render.call(this);
-    this.renderRounds(20, 575);
-    this.renderScore(320, 575);
-};
-
-Player.renderRounds = function(x, y) {
-    renderText(`Rounds: ${this.rounds}`, x, y, "#4f0404");
-};
-
-Player.renderScore = function(x, y) {
-    renderText(`Score: ${this.score}`, x, y, "#4f0404");
-};
-
-Player.move = function(x, y) {
-    this.x = x;
-    this.y = y;
-}
-
-Player.setRounds = function(value) {
-    this.rounds = value;
-};
-
-Player.setScore = function(value) {
-    this.score = value;
-};
-
-// check if the player is in the sea
-Player.update = function() {
-    if (this.score < 0) {
-        startOver("Sorry, you can't have negative score");
-    }
-    if (this.y < 0) { // its on the sea
-        if (this.rounds === 4) {
-            if (this.score >= 1000) {
-                startOver("You won. Congratulations!!")
-            } else {
-                startOver("Sorry, you lose!!");
-            }
-        } else {
-            this.rounds++;
-            this.score += 100;
-            generateGems(player.rounds);
-        }
-        this.move(202, 390);
-    }
-};
-
-
-
-Player.handleInput = function(keyCode) {
-    switch (keyCode) {
-        case "left":
-            if (this.x > 0) {
-                this.x -= 101;
-            };
-            break;
-
-        case "right":
-            if (this.x < 404) {
-                this.x += 101;
-            };
-            break;
-
-        case "up":
-            if (this.y > -10) {
-                this.y -= 83;
-            };
-            break;
-
-        case "down":
-            if (this.y < 390) {
-                this.y += 83;
-            };
-            break;
-
-        default:
-            break;
-    }
-
-}
-
-const Gem = Object.create(GameCharacter);
-
-Gem.initGem = function(x, y, imageSrc, color) {
-    this.initCharacter(x, y, imageSrc);
-    this.color = color;
-};
-
-Gem.setValue = function() {
-    this.value = this.color === "Orange" ? 100 : this.color === "Blue" ? 150 : 120;
-}
-
-Gem.render = function() {
-    GameCharacter.render.call(this);
-    this.renderValue();
-};
-
-Gem.renderValue = function() {
-    renderText(`${this.value}`, this.x + 10, this.y + 101, "#b20a0a");
-};
-
-Gem.update = function() {
-    if (isCollision(player, this)) {
-
-        player.score += this.value;
-        removeCharacter(allGems, this);
-    }
-};
-
-function renderText(text, x, y, color) {
-    ctx.font = "bold 30px arial";
-    ctx.fillStyle = color;
-
-    ctx.fillText(text, x, y);
-}
-
-function removeCharacter(arrayCharacters, character) {
-    let index = arrayCharacters.indexOf(character);
-    arrayCharacters.splice(index, 1);
-}
-
-
-function isCollision(gameCharacter_1, gameCharacter_2) {
-
-    return Math.abs(gameCharacter_1.x - gameCharacter_2.x) <= 30 && Math.abs(gameCharacter_1.y - gameCharacter_2.y) <= 30 ? true : false;
-
-}
-
-function generateEnemies() {
-
-    const getRow = () => Math.floor(Math.floor(Math.random() * 3));
-
-    const getEnemy = () => {
-        let enemy = Object.create(Enemy);
-        enemy.initEnemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', ENEMY_SPEED[getRow()]);
-
-        return enemy;
+            return enemy;
+        };
+        allEnemies.push(createEnemy());
+        resetEnemies = setInterval(() => {
+            allEnemies.push(createEnemy());
+        }, 700);
     };
 
-    allEnemies.push(getEnemy());
+    const generateRocks = () => { //fill the allRocks array depending on rounds
+        if (rounds > 0) {
+            let rock = Object.create(Rock);
+            let position = ROCK_POS[rounds - 1];
+            rock.initRock(position[0], position[1], 'images/Rock.png', 'rock');
+            allRocks.push(rock);
+        } else {
+            allRocks.splice(0, 4);
+        }
+    };
 
-    resetEnemies = setInterval(() => {
-        allEnemies.push(getEnemy());
-    }, 700);
+    const generateGems = () => { //fill allGems array with gems taking into account the game rounds 
+        allGems.splice(0, allGems.length);
 
-}
+        for (let index = 0; index < rounds; index++) {
+            let color = GEMS_COLOR[getRow()];
+            let gem = Object.create(Gem);
+            let location = GEMS_POS[getRow()][getRow()];
+            gem.initGem(location[0], location[1], `images/Gem-${color}.png`, "gem", color);
+            allGems.push(gem);
+        }
 
-function generateGems(amount) {
-    allGems.splice(0, allGems.length);
-    const getRow = () => Math.floor(Math.floor(Math.random() * 3));
+    };
 
-    for (let index = 0; index < amount; index++) {
+    const collitionWithPlayerHandler = (character) => {
+        if (Math.abs(player.x - character.x) <= 30 && Math.abs(player.y - character.y) <= 30) {
+            if (character.type === "enemy") { // if there is a collition with an enemy and game score negative, the game is over (player loose)
+                if ((score -= 100) < 0) {
+                    endGame("You can't have a negative score", score, rounds);
+                }
+                player.initialPosition();
+            }
+            if (character.type === "gem") { // if threre is a collition with a gem, score is aumented with the gem value 
+                score += character.value;
+                removeCharacter(character, allGems);
+            }
+            return true;
+        }
+        return false;
+    };
 
-        let gem = Object.create(Gem);
-        let color = GEMS_COLOR[getRow()];
-        gem.initGem(10 + index * 101, GEMS_ROW[getRow()], `images/Gem-${color}.png`, color);
-        gem.setValue();
-        allGems.push(gem);
+    const roundCompletedHandler = (player) => { // check if the Player finish a round check
+        if (player.y < 0) {
+            rounds++;
+            score += 50;
+            player.initialPosition();
+            if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
+                if (score <= 1000) {
+                    endGame("Im Sorry!! You Loose!!", score, rounds);
+                } else { // the round is 4 but the score is less than 1000 (player loose)
+                    endGame("Congratulations!! You are a winner!!", score, rounds)
+                }
+            } else {
+                generateGems();
+                generateRocks();
+            }
+        }
+
+    };
+
+    const enemyOutOfCanvasHandler = (enemy) => { // if there is an enemy out of canvas, remove it from allEnemies array
+        if (enemy.x > 550) {
+            removeCharacter(enemy, allEnemies);
+        }
+    };
+
+    const handleInput = (keyCode) => { // move player lefet, right, up, down, depending on keyCode value
+        switch (keyCode) {
+            case "left":
+                player.moveLeft();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveRight();
+                break;
+
+            case "right":
+                player.moveRight();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveLeft();
+                break;
+
+            case "up":
+                player.moveUp();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveDown();
+                break;
+
+            case "down":
+                player.moveDown();
+                if (allRocks.some(collitionWithPlayerHandler)) player.moveUp();
+                break;
+
+            default:
+                break;
+        }
     }
 
+    const renderGameProgress = () => { // render score and rounds for the user keep track on his progress in the game
+        ctx.fillText(`Score: ${score}`, 30, 100);
+        ctx.fillText(`Rounds: ${rounds}`, 330, 100);
+    };
+
+    const removeCharacter = (character, arrayCharacters) => {
+        let index = arrayCharacters.indexOf(character);
+        arrayCharacters.splice(index, 1);
+    }
+
+    const startGame = () => {
+        score = 0;
+        rounds = 0;
+        player.initialPosition();
+        clearInterval(resetEnemies);
+        generateEnemies();
+        generateGems();
+        generateRocks();
+    };
+
+    return { //all game public properties and methos
+        allEnemies: allEnemies,
+        allGems: allGems,
+        allRocks: allRocks,
+        player: player,
+        score: score,
+        rounds: rounds,
+        startGame: startGame,
+        roundCompletedHandler: roundCompletedHandler,
+        collitionWithPlayerHandler: collitionWithPlayerHandler,
+        enemyOutOfCanvasHandler: enemyOutOfCanvasHandler,
+        handleInput: handleInput,
+        renderGameProgress: renderGameProgress
+    };
+})();
+
+function endGame(smg, score, rounds) { //show screen corresponding to the end game
+    const finalScreen = document.getElementById('final-screen');
+    document.getElementById('gameResult').innerText = smg;
+    document.getElementById('score').innerText = score;
+    document.getElementById('rounds').innerText = rounds;
+    finalScreen.classList.remove("close");
 }
 
-function initGame() {
-    player.setRounds(0);
-    player.setScore(0);
+function choosePlayerHandler(evt) {
+    let anotherPlayerSelected = document.querySelector('.bouncing');
 
-    clearInterval(resetEnemies);
-    generateGems(player.rounds);
-    generateEnemies();
+    evt.preventDefault();
+    if (anotherPlayerSelected) anotherPlayerSelected.classList.remove('bouncing');
+    evt.target.classList.add("bouncing");
+    Game.player.sprite = evt.target.value;
 }
 
-function startOver(smg) {
-    const restartScreen = document.getElementById('restart-game-container');
-    const gameResult = document.getElementById('gameResult');
-    const finalScore = document.getElementById('score');
-    const finalRounds = document.getElementById('rounds');
-
-    gameResult.innerText = smg;
-    finalScore.innerText = player.score;
-    finalRounds.innerText = player.rounds;
-    restartScreen.classList.remove("close");
-    initGame();
-}
-
-function initGameHandler(evt) {
+function startGameHandler(evt) {
+    let rows = [].slice.call(document.querySelectorAll(".row"));
     evt.preventDefault();
     evt.stopPropagation();
 
-    let screen = evt.target.id === 'start-game-button' ? document.getElementById('start-game-container') :
-        document.getElementById('restart-game-container');
-
-    initGame();
-    screen.classList.add('close');
-}
-
-const player = Object.create(Player);
-player.initPlayer(202, 390, 'images/char-cat-girl.png');
-
-Resources.onReady(function() {
-    const gameButtons = document.querySelectorAll('.gameButton');
-    const myPlayers = document.querySelectorAll('.player');
-
-    myPlayers.forEach((myPlayer) => {
-        myPlayer.addEventListener("click", (evt) => {
-            evt.preventDefault();
-            evt.stopPropagation();
-            let anotherSelectedPlayer = document.getElementsByClassName('bouncing')[0];
-            if (anotherSelectedPlayer) {
-                anotherSelectedPlayer.classList.remove('bouncing');
-            }
-            evt.target.classList.add("bouncing");
-            player.sprite = evt.target.value;
-        })
+    rows.forEach((row) => {
+        if (!row.classList.contains('close')) {
+            row.classList.add('close');
+        }
     });
 
+    Game.startGame();
+}
+
+Resources.onReady(function() {
+    const gameButtons = [].slice.call(document.querySelectorAll('.game-button'));
+    const playersToChoose = [].slice.call(document.querySelectorAll('.player-input'));
+
+    playersToChoose.forEach((player) => {
+        player.addEventListener("click", choosePlayerHandler);
+    });
 
     gameButtons.forEach((button) => {
-        button.addEventListener('click', initGameHandler);
+        button.addEventListener('click', startGameHandler);
     });
 
     document.addEventListener('keyup', (evt) => {
@@ -272,6 +236,6 @@ Resources.onReady(function() {
 
         evt.preventDefault();
         evt.stopPropagation();
-        player.handleInput(allowedKeys[evt.keyCode]);
+        Game.handleInput(allowedKeys[evt.keyCode]);
     });
 });
