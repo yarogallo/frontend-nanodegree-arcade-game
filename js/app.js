@@ -103,34 +103,6 @@ const Game = (function() {
 
     };
 
-
-    const handleInput = (keyCode) => { // move player lefet, right, up, down, depending on keyCode value
-        switch (keyCode) {
-            case "left":
-                player.moveLeft();
-                if (allRocks.some(player.isCollition)) player.moveRight();
-                break;
-
-            case "right":
-                player.moveRight();
-                if (allRocks.some(player.isCollition)) player.moveLeft();
-                break;
-
-            case "up":
-                player.moveUp();
-                if (allRocks.some(player.isCollition)) player.moveDown();
-                break;
-
-            case "down":
-                player.moveDown();
-                if (allRocks.some(collitionWithPlayerHandler)) player.moveUp();
-                break;
-
-            default:
-                break;
-        }
-    }
-
     const renderGameProgress = () => { // render score and rounds for the user keep track on his progress in the game
         ctx.fillText(`Score: ${score}`, 30, 100);
         ctx.fillText(`Rounds: ${rounds}`, 330, 100);
@@ -151,7 +123,7 @@ const Game = (function() {
         generateRocks();
     };
 
-    return { //all game public properties and methos
+    return { //all game public properties and methods
         allEnemies: allEnemies,
         allGems: allGems,
         allRocks: allRocks,
@@ -177,11 +149,11 @@ function endGame(smg, score, rounds) { //show screen corresponding to the end ga
 
 function choosePlayerHandler(evt) {
     let anotherPlayerSelected = document.querySelector('.bouncing');
-
+    console.log(evt.target.data);
     evt.preventDefault();
     if (anotherPlayerSelected) anotherPlayerSelected.classList.remove('bouncing');
     evt.target.classList.add("bouncing");
-    Game.player.sprite = evt.target.value;
+    Game.player.sprite = evt.target.getAttribute("src");
 }
 
 function startGameHandler(evt) {
