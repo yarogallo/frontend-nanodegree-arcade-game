@@ -16,10 +16,15 @@ const Enemy = function(x, y, sprite, type, speed) {
 
 Enemy.prototype = Object.create(GameCharacter.prototype);
 
+Enemy.prototype.outOfCanvasHandler = function() {
+    return this.x > 550;
+};
 
 Enemy.prototype.update = function(dt) {
-    Game.collitionWithPlayerHandler(this); // check if there is a collition between this enemy and the player
-    Game.enemyOutOfCanvasHandler(this); // check if the enemy is out of canvas
+    if (Game.player.isCollition(this)) Game.collitionWithEnemyhandler(); //Game rest to the score or en the game
+
+    if (this.outOfCanvasHandler()) Game.enemyOutOfCanvasHandler(this); // Game remove enemy that is out of canvas from allEnemies array
+
     this.x += (dt * this.speed); // keep moving
 };
 
@@ -28,6 +33,14 @@ const Player = function(x, y, sprite, type) {
 }
 
 Player.prototype = Object.create(GameCharacter.prototype);
+
+Player.prototype.isRoundCompleted = function() {
+    return this.y < 0;
+}
+
+Player.prototype.isCollition = function(character) {
+    return Math.abs(this.x - character.x) <= 30 && Math.abs(this.y - character.y) <= 30;
+}
 
 Player.prototype.initialPosition = function() {
     this.x = 202;
@@ -51,8 +64,38 @@ Player.prototype.moveUp = function() {
 };
 
 Player.prototype.update = function() {
-    Game.roundCompletedHandler(this);
+    if (this.isRoundCompleted()) {
+        Game.roundCompletedHandler();
+        this.initialPosition();
+    };
 };
+
+Player.prototype.handleInput = function(keyCode) {
+    switch (keyCode) {
+        case "left":
+            this.moveLeft();
+            Game.allRocks.forEach((rock) => { if (this.isCollition(rock)) this.moveRight(); });
+            break;
+
+        case "right":
+            this.moveRight();
+            Game.allRocks.forEach((rock) => { if (this.isCollition(rock)) this.moveLeft(); });
+            break;
+
+        case "up":
+            this.moveUp();
+            Game.allRocks.forEach((rock) => { if (this.isCollition(rock)) this.moveDown(); });
+            break;
+
+        case "down":
+            this.moveDown();
+            Game.allRocks.forEach((rock) => { if (this.isCollition(rock)) this.moveUp(); });
+            break;
+
+        default:
+            break;
+    }
+}
 
 const Gem = function(x, y, sprite, type, color) {
     GameCharacter.call(this, x, y, sprite, type);
@@ -66,7 +109,7 @@ Gem.prototype.render = function() {
 };
 
 Gem.prototype.update = function() {
-    Game.collitionWithPlayerHandler(this); //check collitions between player and tbhis gem
+    if (Game.player.isCollition(this)) Game.collitionWithGemsHandler(this); //Game adition to the score
 };
 
 const Rock = function(x, y, sprite, type) {

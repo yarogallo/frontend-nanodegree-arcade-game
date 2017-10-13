@@ -27,7 +27,7 @@ const Game = (function() {
     const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
     let resetEnemies = null;
 
-    const player = new Player(202, 390, 'images/char-cat-girl.png'); //init player with a default image
+    const player = new Player(202, 390, 'images/char-cat-girl.png', 'player'); //init player with a default image
     const allEnemies = [];
     const allGems = [];
     const allRocks = [];
@@ -70,63 +70,55 @@ const Game = (function() {
 
     };
 
-    const collitionWithPlayerHandler = (character) => {
-        if (Math.abs(player.x - character.x) <= 30 && Math.abs(player.y - character.y) <= 30) {
-            if (character.type === "enemy") { // if there is a collition with an enemy and game score negative, the game is over (player loose)
-                if ((score -= 100) < 0) {
-                    endGame("You can't have a negative score", score, rounds);
-                }
-                player.initialPosition();
-            }
-            if (character.type === "gem") { // if threre is a collition with a gem, score is aumented with the gem value 
-                score += character.value;
-                removeCharacter(character, allGems);
-            }
-            return true;
+    const enemyOutOfCanvasHandler = (enemy) => {
+        removeCharacter(enemy, allEnemies);
+    }
+
+    const collitionWithEnemyhandler = () => {
+        score -= 100;
+        player.initialPosition();
+        if (score < 0) {
+            endGame("You can't have a negative score", score, rounds);
         }
-        return false;
     };
 
-    const roundCompletedHandler = (player) => { // check if the Player finish a round check
-        if (player.y < 0) {
-            rounds++;
-            score += 50;
-            player.initialPosition();
-            if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
-                if (score <= 1000) {
-                    endGame("Im Sorry!! You Loose!!", score, rounds);
-                } else { // the round is 4 but the score is less than 1000 (player loose)
-                    endGame("Congratulations!! You are a winner!!", score, rounds)
-                }
-            } else {
-                generateGems();
-                generateRocks();
+    const collitionWithGemsHandler = (gem) => {
+        score += gem.value;
+        removeCharacter(gem, allGems);
+    }
+
+    const roundCompletedHandler = () => { // check if the Player finish a round check
+        rounds++;
+        score += 50;
+        if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
+            if (score <= 1000) {
+                endGame("Im Sorry!! You Loose!!", score, rounds);
+            } else { // the round is 4 but the score is less than 1000 (player loose)
+                endGame("Congratulations!! You are a winner!!", score, rounds)
             }
+        } else {
+            generateGems();
+            generateRocks();
         }
 
     };
 
-    const enemyOutOfCanvasHandler = (enemy) => { // if there is an enemy out of canvas, remove it from allEnemies array
-        if (enemy.x > 550) {
-            removeCharacter(enemy, allEnemies);
-        }
-    };
 
     const handleInput = (keyCode) => { // move player lefet, right, up, down, depending on keyCode value
         switch (keyCode) {
             case "left":
                 player.moveLeft();
-                if (allRocks.some(collitionWithPlayerHandler)) player.moveRight();
+                if (allRocks.some(player.isCollition)) player.moveRight();
                 break;
 
             case "right":
                 player.moveRight();
-                if (allRocks.some(collitionWithPlayerHandler)) player.moveLeft();
+                if (allRocks.some(player.isCollition)) player.moveLeft();
                 break;
 
             case "up":
                 player.moveUp();
-                if (allRocks.some(collitionWithPlayerHandler)) player.moveDown();
+                if (allRocks.some(player.isCollition)) player.moveDown();
                 break;
 
             case "down":
@@ -168,9 +160,9 @@ const Game = (function() {
         rounds: rounds,
         startGame: startGame,
         roundCompletedHandler: roundCompletedHandler,
-        collitionWithPlayerHandler: collitionWithPlayerHandler,
+        collitionWithEnemyhandler: collitionWithEnemyhandler,
+        collitionWithGemsHandler: collitionWithGemsHandler,
         enemyOutOfCanvasHandler: enemyOutOfCanvasHandler,
-        handleInput: handleInput,
         renderGameProgress: renderGameProgress
     };
 })();
@@ -228,6 +220,6 @@ Resources.onReady(function() {
 
         evt.preventDefault();
         evt.stopPropagation();
-        Game.handleInput(allowedKeys[evt.keyCode]);
+        Game.player.handleInput(allowedKeys[evt.keyCode]);
     });
 });
