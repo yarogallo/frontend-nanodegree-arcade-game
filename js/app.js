@@ -1,5 +1,5 @@
 //The game has a player, a score, rounds, a set of enemies, rocks and gems, and a set of rules that make the game possible.
-//Handle when the game start and finish, wish character is remove from the game and if a player win or lose depending on the
+//Handle when the game start and finish, which character is remove from the game and if a player win or lose depending on the
 //score and amount of rounds reached for the player. The player is the main character!!!
 
 const Game = (function() {
@@ -122,7 +122,7 @@ const Game = (function() {
         generateRocks();
     };
 
-    function endGame(smg, score, rounds) { //show screen corresponding to the end game
+    function endGame(smg) { //show screen corresponding to the end game
         const finalScreen = document.getElementById('final-screen');
 
         document.getElementById('gameResult').innerText = smg;
@@ -169,7 +169,6 @@ const Game = (function() {
         startGameHandler: startGameHandler
     };
 })();
-
 
 Resources.onReady(function() {
     const gameButtons = [].slice.call(document.querySelectorAll('.game-button'));
