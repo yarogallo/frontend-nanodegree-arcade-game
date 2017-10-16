@@ -1,3 +1,7 @@
+//The game has a player, a score, rounds, a set of enemies, rocks and gems, and a set of rules that make the game possible.
+//Handle when the game start and finish, wish character is remove from the game and if a player win or lose depending on the
+//score and amount of rounds reached for the player. The player is the main character!!!
+
 const Game = (function() {
     const ENEMY_ROW = [60, 143, 226];
     const ENEMY_SPEED = [230, 280, 350];
@@ -26,29 +30,23 @@ const Game = (function() {
     ];
     const GEMS_COLOR = ['Orange', 'Blue', 'Green'];
     let resetEnemies = null;
-
+    // Game characters
     const player = new Player(202, 390, 'images/char-cat-girl.png'); //init player with a default image
     const allEnemies = [];
     const allGems = [];
     const allRocks = [];
+    //Game progress values
     let score = 0;
     let rounds = 0;
 
     const getRow = () => Math.floor(Math.floor(Math.random() * 3)); // random number between 0 and 2
-    //fill the allEnemies array with enemies
+    //generate the enemies (fill allEnemies array with enemies)
     const generateEnemies = () => {
-        const createEnemy = () => {
-            let enemy = new Enemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', ENEMY_SPEED[getRow()]);
-
-            return enemy;
-        };
-        allEnemies.push(createEnemy());
-        resetEnemies = setInterval(() => {
-            allEnemies.push(createEnemy());
-        }, 700);
+        let enemy = new Enemy(-101, ENEMY_ROW[getRow()], 'images/enemy-bug.png', ENEMY_SPEED[getRow()]);
+        allEnemies.push(enemy);
     };
-
-    const generateRocks = () => { //fill the allRocks array depending on rounds
+    //Put rocks in allRocks array, only when the threre are one or more rounds completed, if the game starting, remove all rocks from the game
+    const generateRocks = () => {
         if (rounds > 0) {
             let position = ROCK_POS[rounds - 1];
             let rock = new Rock(position[0], position[1], 'images/Rock.png');
@@ -57,7 +55,7 @@ const Game = (function() {
             allRocks.splice(0, 4);
         }
     };
-    //fill allGems array with gems taking into account the game rounds 
+    //Put gems in AllGems array, the amount off gems are equal to the rounds. 
     const generateGems = () => {
         allGems.splice(0, allGems.length);
 
@@ -69,33 +67,32 @@ const Game = (function() {
         }
 
     };
-    //when an enemy collition with the player, the score is decremented, if the score became negative the game ends
+    //when an enemy crash with the player, the score is decremented, if the score became negative the game ends
     const playerCrashWithEnemy = () => {
         score -= 100;
         player.initialPosition();
-        if (score < 0) {
-            endGame("You can't have a negative score", score, rounds);
-        }
+        if (score < 0) return endGame("You can't have a negative score", score, rounds);
     };
-    //when the player collition with a gem, the game increment the score, depending on the gem value
-    //and remove it from the game
+    //when the player crash with a gem, the game increment the score, depending on the gem value
+    //and remove the gem from the game
     const playerCrashWithGem = (gem) => {
             score += gem.value;
             removeCharacter(gem, allGems);
         }
-        //when an enemy is out of canvas, is going to be deleted from the game
+        //when an enemy is out of canvas, is going to be remove from the game
     const enemyOutOfCanvas = (enemy) => {
             removeCharacter(enemy, allEnemies);
         }
-        //  the player is in the sea, the game increment round and score and check if the game finish.
+        // When the player finish a round, the game increment rounds and score, and check if the game finish.
+        //If the game is not finis yet, the game is going to generate gems and rocks depending on the rounds.
     const roundCompleted = () => {
         rounds++;
         score += 50;
         if (rounds === 5) { // if the round is number 4 and the score is more than or equal 1000 (player win)
             if (score <= 1000) {
-                endGame("Im Sorry!! You Loose!!", score, rounds);
+                return endGame("Im Sorry!! You Loose!!", score, rounds);
             } else { // the round is 4 but the score is less than 1000 (player loose)
-                endGame("Congratulations!! You are a winner!!", score, rounds)
+                return endGame("Congratulations!! You are a winner!!", score, rounds)
             }
         } else {
             generateGems();
@@ -103,8 +100,8 @@ const Game = (function() {
         }
 
     };
-
-    const renderGameProgress = () => { // render score and rounds for the user keep track on his progress in the game
+    // Render score and rounds for the user keep track on his progress in the game
+    const renderGameProgress = () => {
         ctx.fillText(`Score: ${score}`, 30, 100);
         ctx.fillText(`Rounds: ${rounds}`, 330, 100);
     };
@@ -118,17 +115,20 @@ const Game = (function() {
         score = 0;
         rounds = 0;
         player.initialPosition();
-        clearInterval(resetEnemies);
-        generateEnemies();
+        resetEnemies = setInterval(() => {
+            generateEnemies();
+        }, 700);
         generateGems();
         generateRocks();
     };
 
     function endGame(smg, score, rounds) { //show screen corresponding to the end game
         const finalScreen = document.getElementById('final-screen');
+
         document.getElementById('gameResult').innerText = smg;
         document.getElementById('score').innerText = score;
         document.getElementById('rounds').innerText = rounds;
+        clearInterval(resetEnemies);
         finalScreen.classList.remove("close");
     }
 
@@ -154,9 +154,8 @@ const Game = (function() {
 
         startGame();
     }
-
-
-    return { //all game public properties and methods
+    //Game public properties and methods
+    return {
         allEnemies: allEnemies,
         allGems: allGems,
         allRocks: allRocks,
