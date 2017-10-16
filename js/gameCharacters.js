@@ -1,45 +1,53 @@
-const GameCharacter = function(x, y, sprite, type) {
+const GameCharacter = function(x, y, sprite) {
     this.x = x;
     this.y = y;
     this.sprite = sprite;
-    this.type = type;
 }
 
 GameCharacter.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
-const Enemy = function(x, y, sprite, type, speed) {
-    GameCharacter.call(this, x, y, sprite, type);
+GameCharacter.prototype.isCollition = function(character) {
+    return Math.abs(this.x - character.x) <= 30 && Math.abs(this.y - character.y) <= 30;
+}
+
+const Enemy = function(x, y, sprite, speed) {
+    GameCharacter.call(this, x, y, sprite);
     this.speed = speed;
 }
 
 Enemy.prototype = Object.create(GameCharacter.prototype);
+Enemy.prototype.constructor = Enemy;
 
 Enemy.prototype.outOfCanvasHandler = function() {
     return this.x > 550;
 };
 
+Enemy.prototype.move = function(dt) {
+    this.x += (dt * this.speed);
+}
+
 Enemy.prototype.update = function(dt) {
-    if (Game.player.isCollition(this)) Game.collitionWithEnemyhandler(); //Game rest to the score or en the game
-
-    if (this.outOfCanvasHandler()) Game.enemyOutOfCanvasHandler(this); // Game remove enemy that is out of canvas from allEnemies array
-
-    this.x += (dt * this.speed); // keep moving
+    if (this.isCollition(Game.player)) {
+        Game.playerCrashWithEnemy(); // tell the game that threre is a collition between one enemy an the player
+    }
+    if (this.outOfCanvasHandler()) {
+        Game.enemyOutOfCanvas(this); //the game remove character from the game
+    } else {
+        this.move(dt);
+    }
 };
 
-const Player = function(x, y, sprite, type) {
-    GameCharacter.call(this, x, y, sprite, type);
+const Player = function(x, y, sprite) {
+    GameCharacter.call(this, x, y, sprite);
 }
 
 Player.prototype = Object.create(GameCharacter.prototype);
+Player.prototype.constructor = Player;
 
 Player.prototype.isRoundCompleted = function() {
     return this.y < 0;
-}
-
-Player.prototype.isCollition = function(character) {
-    return Math.abs(this.x - character.x) <= 30 && Math.abs(this.y - character.y) <= 30;
 }
 
 Player.prototype.initialPosition = function() {
@@ -63,13 +71,15 @@ Player.prototype.moveUp = function() {
     if (this.y > -10) this.y -= 83;
 };
 
+// if the player is in the sea, return to initial position and let the game know that a round has been completed 
 Player.prototype.update = function() {
     if (this.isRoundCompleted()) {
-        Game.roundCompletedHandler();
         this.initialPosition();
-    };
+        Game.roundCompleted();
+    }
 };
 
+// any time that the player make a move is going to check if there is a rock on his way
 Player.prototype.handleInput = function(keyCode) {
     switch (keyCode) {
         case "left":
@@ -97,11 +107,14 @@ Player.prototype.handleInput = function(keyCode) {
     }
 }
 
-const Gem = function(x, y, sprite, type, color) {
-    GameCharacter.call(this, x, y, sprite, type);
+const Gem = function(x, y, sprite, color) {
+    GameCharacter.call(this, x, y, sprite);
     this.color = color;
     this.value = this.color === "Orange" ? 100 : this.color === "Blue" ? 150 : 120;
 };
+Gem.prototype = Object.create(GameCharacter.prototype);
+Gem.prototype.constructor = Gem;
+console.log(Gem.prototype);
 
 Gem.prototype.render = function() {
     GameCharacter.prototype.render.call(this);
@@ -109,11 +122,12 @@ Gem.prototype.render = function() {
 };
 
 Gem.prototype.update = function() {
-    if (Game.player.isCollition(this)) Game.collitionWithGemsHandler(this); //Game adition to the score
+    if (this.isCollition(Game.player)) Game.playerCrashWithGem(this); //tel the game there is a collition between a gem an a player
 };
 
-const Rock = function(x, y, sprite, type) {
-    GameCharacter.call(this, x, y, sprite, type);
+const Rock = function(x, y, sprite) {
+    GameCharacter.call(this, x, y, sprite);
 }
 
 Rock.prototype = Object.create(GameCharacter.prototype);
+Rock.prototype.constructor = GameCharacter;
