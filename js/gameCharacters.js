@@ -2,23 +2,23 @@
 // they share two methods, render and isCollition
 
 const GameCharacter = function(x, y, sprite) {
-        this.x = x;
-        this.y = y;
-        this.sprite = sprite;
-    }
-    // render the character in the canvas, is the same for all characters
+    this.x = x;
+    this.y = y;
+    this.sprite = sprite;
+};
+// render the character in the canvas, is the same for all characters
 GameCharacter.prototype.render = function() {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-    // check if there is a collition between two characters of the game
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+// check if there is a collition between two characters of the game
 GameCharacter.prototype.isCollition = function(character) {
     return Math.abs(this.x - character.x) <= 30 && Math.abs(this.y - character.y) <= 30;
-}
+};
 
 const Enemy = function(x, y, sprite, speed) {
     GameCharacter.call(this, x, y, sprite);
     this.speed = speed;
-}
+};
 
 Enemy.prototype = Object.create(GameCharacter.prototype);
 Enemy.prototype.constructor = Enemy; //constructor point to Enemy
@@ -28,11 +28,11 @@ Enemy.prototype.outOfCanvasHandler = function() { // check ifthe enemy is out of
 };
 
 Enemy.prototype.move = function(dt) { //move the enemy for axis
-        this.x += (dt * this.speed);
-    }
-    //each time check if the teh enemy crash with the game player, and let the game know that there was a crash between an enemy and the player.
-    //Check if this enemy is out of canvas, tell the game and the game is going to remove this enemy from the game.
-    // if the enemy is not out of canvas then keep moving
+    this.x += (dt * this.speed);
+};
+//each time check if the teh enemy crash with the game player, and let the game know that there was a crash between an enemy and the player.
+//Check if this enemy is out of canvas, tell the game and the game is going to remove this enemy from the game.
+// if the enemy is not out of canvas then keep moving
 Enemy.prototype.update = function(dt) {
     if (this.isCollition(Game.player)) {
         Game.playerCrashWithEnemy();
@@ -46,7 +46,7 @@ Enemy.prototype.update = function(dt) {
 
 const Player = function(x, y, sprite) {
     GameCharacter.call(this, x, y, sprite);
-}
+};
 
 Player.prototype = Object.create(GameCharacter.prototype);
 Player.prototype.constructor = Player;
@@ -54,7 +54,7 @@ Player.prototype.constructor = Player;
 //Check if the player arrived to the sea(if completed a round)
 Player.prototype.isRoundCompleted = function() {
     return this.y < 0;
-}
+};
 
 Player.prototype.initialPosition = function() {
     this.x = 202;
@@ -113,7 +113,7 @@ Player.prototype.handleInput = function(keyCode) {
         default:
             break;
     }
-}
+};
 
 const Gem = function(x, y, sprite, color) {
     GameCharacter.call(this, x, y, sprite);
@@ -134,7 +134,7 @@ Gem.prototype.update = function() {
 // The only work that the rocks have is block the player.
 const Rock = function(x, y, sprite) {
     GameCharacter.call(this, x, y, sprite);
-}
+};
 
 Rock.prototype = Object.create(GameCharacter.prototype);
 Rock.prototype.constructor = GameCharacter;

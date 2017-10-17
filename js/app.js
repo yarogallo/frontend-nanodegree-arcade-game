@@ -76,15 +76,15 @@ const Game = (function() {
     //when the player crash with a gem, the game increment the score, depending on the gem value
     //and remove the gem from the game
     const playerCrashWithGem = (gem) => {
-            score += gem.value;
-            removeCharacter(gem, allGems);
-        }
-        //when an enemy is out of canvas, is going to be remove from the game
+        score += gem.value;
+        removeCharacter(gem, allGems);
+    };
+    //when an enemy is out of canvas, is going to be remove from the game
     const enemyOutOfCanvas = (enemy) => {
-            removeCharacter(enemy, allEnemies);
-        }
-        // When the player finish a round, the game increment rounds and score, and check if the game finish.
-        //If the game is not finis yet, the game is going to generate gems and rocks depending on the rounds.
+        removeCharacter(enemy, allEnemies);
+    };
+    // When the player finish a round, the game increment rounds and score, and check if the game finish.
+    //If the game is not finis yet, the game is going to generate gems and rocks depending on the rounds.
     const roundCompleted = () => {
         rounds++;
         score += 50;
@@ -92,7 +92,7 @@ const Game = (function() {
             if (score <= 1000) {
                 return endGame("Im Sorry!! You Loose!!", score, rounds);
             } else { // the round is 4 but the score is less than 1000 (player loose)
-                return endGame("Congratulations!! You are a winner!!", score, rounds)
+                return endGame("Congratulations!! You are a winner!!", score, rounds);
             }
         } else {
             generateGems();
@@ -109,7 +109,7 @@ const Game = (function() {
     const removeCharacter = (character, arrayOfCharacters) => {
         let index = arrayOfCharacters.indexOf(character);
         arrayOfCharacters.splice(index, 1);
-    }
+    };
 
     const startGame = () => {
         score = 0;
